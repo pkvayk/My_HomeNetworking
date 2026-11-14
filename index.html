@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Network Command Center - Dark Purple UI</title>
+    <title>Home Network Command Center - Liquid Glass UI</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js untuk Grafik Bandwidth -->
@@ -12,197 +12,199 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0d0b21; color: #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background-color: #090718; color: #e2e8f0; }
         .glass-card {
-            background: rgba(30, 27, 75, 0.6);
-            backdrop-filter: blur(16px);
+            background: rgba(26, 22, 60, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5);
         }
-        .sidebar-icon {
+        .glass-sidebar {
+            background: rgba(21, 18, 56, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .nav-btn {
             transition: all 0.3s ease;
         }
-        .sidebar-icon.active, .sidebar-icon:hover {
+        .nav-btn.active, .nav-btn:hover {
             background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
             color: #ffffff;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
         }
     </style>
 </head>
-<body class="min-h-screen flex p-4 md:p-6 gap-6 select-none">
+<body class="min-h-screen flex flex-col md:flex-row p-3 md:p-6 gap-4 md:gap-6 select-none pb-24 md:pb-6">
 
-    <!-- Floating Curved Sidebar -->
-    <aside class="w-20 bg-[#151238] rounded-3xl flex flex-col items-center justify-between py-8 shadow-2xl border border-white/5">
+    <!-- DESKTOP SIDEBAR (Hidden on Mobile) -->
+    <aside class="hidden md:flex w-20 glass-sidebar rounded-3xl flex-col items-center justify-between py-8 shadow-2xl shrink-0">
         <div class="flex flex-col items-center space-y-8">
-            <!-- Logo Brand -->
             <div class="w-12 h-12 bg-gradient-to-tr from-purple-600 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
                 <i class="fa-solid fa-cube text-xl"></i>
             </div>
-            
-            <!-- Navigation Submenu Icons (Clickable with Preview) -->
             <nav class="flex flex-col space-y-4">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-icon active w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Dashboard Utama">
+                <button onclick="switchTab('dashboard')" id="nav-dash-pc" class="nav-btn active w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Dashboard">
                     <i class="fa-solid fa-house"></i>
                 </button>
-                <button onclick="switchTab('topology')" id="nav-topology" class="sidebar-icon w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Topologi Perangkat (D-Link & TP-Link)">
+                <button onclick="switchTab('topology')" id="nav-topo-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Topologi">
                     <i class="fa-solid fa-network-wired"></i>
                 </button>
-                <button onclick="switchTab('bandwidth')" id="nav-bandwidth" class="sidebar-icon w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Statistik & Grafik Bandwidth">
+                <button onclick="switchTab('bandwidth')" id="nav-band-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Bandwidth">
                     <i class="fa-solid fa-chart-line"></i>
                 </button>
-                <button onclick="switchTab('clients')" id="nav-clients" class="sidebar-icon w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Perangkat Terhubung (Client List)">
+                <button onclick="switchTab('clients')" id="nav-client-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Perangkat">
                     <i class="fa-solid fa-laptop"></i>
                 </button>
-                <button onclick="switchTab('settings')" id="nav-settings" class="sidebar-icon w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Pengaturan & Jadwal Auto-Reboot">
+                <button onclick="switchTab('settings')" id="nav-set-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300" title="Pengaturan">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </nav>
         </div>
-
-        <!-- Logout / Footer Icon -->
-        <div class="text-purple-400 hover:text-white cursor-pointer">
-            <i class="fa-solid fa-arrow-right-from-bracket text-lg"></i>
-        </div>
+        <div class="text-purple-400 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-right-from-bracket text-lg"></i></div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col gap-6 max-w-7xl mx-auto overflow-hidden">
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Fixed at bottom on Mobile) -->
+    <nav class="md:hidden fixed bottom-3 left-3 right-3 z-50 glass-sidebar rounded-2xl p-2 flex justify-around items-center shadow-2xl">
+        <button onclick="switchTab('dashboard')" id="nav-dash-m" class="nav-btn active p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-house text-base"></i></button>
+        <button onclick="switchTab('topology')" id="nav-topo-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-network-wired text-base"></i></button>
+        <button onclick="switchTab('bandwidth')" id="nav-band-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-chart-line text-base"></i></button>
+        <button onclick="switchTab('clients')" id="nav-client-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-laptop text-base"></i></button>
+        <button onclick="switchTab('settings')" id="nav-set-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-gear text-base"></i></button>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 flex flex-col gap-5 max-w-7xl mx-auto w-full overflow-hidden">
         
-        <!-- Top Bar Header -->
-        <header class="flex justify-between items-center bg-[#151238]/60 backdrop-blur-xl px-6 py-4 rounded-3xl border border-white/5">
+        <!-- Top Header -->
+        <header class="flex justify-between items-center glass-card px-5 py-3.5 rounded-2xl">
             <div>
-                <h1 id="page-title" class="text-xl font-bold text-white tracking-wide">Dashboard</h1>
-                <p id="page-desc" class="text-xs text-purple-300">Ringkasan performa jaringan rumah XL Home secara real-time</p>
+                <h1 id="page-title" class="text-lg md:text-xl font-bold text-white tracking-wide">Dashboard</h1>
+                <p id="page-desc" class="text-[11px] md:text-xs text-purple-300">XL Home - SINDORA_FURNITURE</p>
             </div>
-            <div class="flex items-center space-x-4">
-                <div class="relative hidden sm:block">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-purple-400 text-xs"></i>
-                    <input type="text" placeholder="Cari perangkat..." class="bg-[#1e1b4b] border border-white/10 rounded-full pl-10 pr-4 py-2 text-xs text-white placeholder-purple-400 focus:outline-none focus:border-purple-500 w-48">
-                </div>
-                <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-emerald-400 text-xs font-medium">
+            <div class="flex items-center space-x-3">
+                <div class="hidden sm:flex items-center space-x-1.5 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-medium">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Auto-Reboot 03:00 Active</span>
+                    <span>Reboot 03:00 Active</span>
                 </div>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
                     SF
                 </div>
             </div>
         </header>
 
-        <!-- Dynamic Content Panel (Changes based on sidebar selection) -->
-        <div id="dynamic-content" class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
-            <!-- Default Content: Dashboard View -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Overview Banner / Chart Card -->
-                <div class="glass-card p-6 rounded-3xl relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-6">
+        <!-- DYNAMIC CONTENT VIEW -->
+        <div id="dynamic-content" class="grid grid-cols-1 lg:grid-cols-3 gap-5 flex-1">
+            
+            <!-- Left & Center Column (Dashboard Main) -->
+            <div class="lg:col-span-2 space-y-5">
+                
+                <!-- Chart Card with Liquid Glass -->
+                <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-4">
                         <div>
-                            <span class="text-xs text-purple-400 uppercase tracking-wider font-semibold">SINDORA_FURNITURE</span>
-                            <h2 class="text-lg font-bold text-white">Aktivitas Jaringan & Bandwidth</h2>
+                            <span class="text-[10px] text-purple-400 uppercase tracking-wider font-semibold">Live Traffic Monitor</span>
+                            <h2 class="text-base font-bold text-white">Aktivitas Jaringan & Bandwidth</h2>
                         </div>
-                        <span class="bg-purple-900/60 text-purple-200 px-3 py-1 rounded-xl text-xs font-medium border border-purple-500/30">Live Stream</span>
+                        <span class="bg-purple-900/50 text-purple-200 px-2.5 py-0.5 rounded-lg text-[10px] font-medium border border-purple-500/30">Live</span>
                     </div>
-                    <div class="h-56">
+                    <div class="h-48 md:h-56">
                         <canvas id="mainChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Quick Metric Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
-                        <div class="flex justify-between items-center text-purple-300 text-xs">
-                            <span>Download Rata-rata</span>
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="glass-card p-4 rounded-2xl">
+                        <div class="flex justify-between items-center text-purple-300 text-xs mb-2">
+                            <span>Download Avg</span>
                             <i class="fa-solid fa-arrow-down text-emerald-400"></i>
                         </div>
-                        <div class="my-3">
-                            <h3 class="text-2xl font-extrabold text-white">142.5 <span class="text-xs font-normal text-purple-300">Mbps</span></h3>
-                        </div>
-                        <div class="w-full bg-purple-950 rounded-full h-1.5 overflow-hidden">
+                        <h3 class="text-xl font-extrabold text-white">142.5 <span class="text-xs font-normal text-purple-300">Mbps</span></h3>
+                        <div class="w-full bg-purple-950 rounded-full h-1.5 mt-3 overflow-hidden">
                             <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-[75%]"></div>
                         </div>
                     </div>
 
-                    <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
-                        <div class="flex justify-between items-center text-purple-300 text-xs">
-                            <span>Upload Rata-rata</span>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <div class="flex justify-between items-center text-purple-300 text-xs mb-2">
+                            <span>Upload Avg</span>
                             <i class="fa-solid fa-arrow-up text-blue-400"></i>
                         </div>
-                        <div class="my-3">
-                            <h3 class="text-2xl font-extrabold text-white">42.8 <span class="text-xs font-normal text-purple-300">Mbps</span></h3>
-                        </div>
-                        <div class="w-full bg-purple-950 rounded-full h-1.5 overflow-hidden">
+                        <h3 class="text-xl font-extrabold text-white">42.8 <span class="text-xs font-normal text-purple-300">Mbps</span></h3>
+                        <div class="w-full bg-purple-950 rounded-full h-1.5 mt-3 overflow-hidden">
                             <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full w-[45%]"></div>
                         </div>
                     </div>
 
-                    <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
-                        <div class="flex justify-between items-center text-purple-300 text-xs">
-                            <span>Total Kuota Bulan Ini</span>
+                    <div class="glass-card p-4 rounded-2xl">
+                        <div class="flex justify-between items-center text-purple-300 text-xs mb-2">
+                            <span>Total Kuota</span>
                             <i class="fa-solid fa-database text-purple-400"></i>
                         </div>
-                        <div class="my-3">
-                            <h3 class="text-2xl font-extrabold text-white">186.5 <span class="text-xs font-normal text-purple-300">GB</span></h3>
-                        </div>
-                        <div class="w-full bg-purple-950 rounded-full h-1.5 overflow-hidden">
+                        <h3 class="text-xl font-extrabold text-white">186.5 <span class="text-xs font-normal text-purple-300">GB</span></h3>
+                        <div class="w-full bg-purple-950 rounded-full h-1.5 mt-3 overflow-hidden">
                             <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-[60%]"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Hardware Status & AI Assistant -->
-            <div class="space-y-6">
-                <!-- Hardware Status Card -->
-                <div class="glass-card p-6 rounded-3xl space-y-4">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Status Perangkat Keras</h3>
+            <!-- Right Column (Hardware & AI) -->
+            <div class="space-y-5">
+                
+                <!-- Hardware Status with Router Gateway Links -->
+                <div class="glass-card p-5 rounded-3xl space-y-3">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Perangkat Keras & Akses Router</h3>
                     
-                    <div class="p-3.5 rounded-2xl bg-purple-900/20 border border-purple-500/20 flex items-center justify-between">
+                    <a href="http://192.168.10.1" target="_blank" class="p-3 rounded-2xl bg-purple-900/20 border border-purple-500/20 flex items-center justify-between hover:bg-purple-900/40 transition">
                         <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold">
-                                <i class="fa-solid fa-network-wired"></i>
+                            <div class="w-9 h-9 rounded-xl bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-network-wired text-sm"></i>
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold text-white">D-Link DIR-878</h4>
-                                <p class="text-[10px] text-purple-300">Main Router (192.168.10.1)</p>
+                                <p class="text-[10px] text-purple-300">192.168.10.1 (Gateway)</p>
                             </div>
                         </div>
-                        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg font-medium">Online</span>
-                    </div>
+                        <span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg">Buka Web <i class="fa-solid fa-external-link-alt ml-1"></i></span>
+                    </a>
 
-                    <div class="p-3.5 rounded-2xl bg-purple-900/20 border border-purple-500/20 flex items-center justify-between">
+                    <div class="p-3 rounded-2xl bg-purple-900/20 border border-purple-500/20 flex items-center justify-between">
                         <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold">
-                                <i class="fa-solid fa-wifi"></i>
+                            <div class="w-9 h-9 rounded-xl bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-wifi text-sm"></i>
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold text-white">TP-Link AX1500</h4>
-                                <p class="text-[10px] text-purple-300">Access Point Mode</p>
+                                <p class="text-[10px] text-purple-300">AP Mode (SINDORA)</p>
                             </div>
                         </div>
                         <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg font-medium">Stable</span>
                     </div>
                 </div>
 
-                <!-- AI Assistant Widget -->
-                <div class="glass-card p-6 rounded-3xl space-y-4">
+                <!-- AI Assistant -->
+                <div class="glass-card p-5 rounded-3xl space-y-3">
                     <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-sm">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xs">
                             <i class="fa-solid fa-robot"></i>
                         </div>
                         <div>
                             <h3 class="text-xs font-bold text-white">AI Network Assistant</h3>
-                            <p class="text-[10px] text-purple-300">Online & siap membantu</p>
+                            <p class="text-[10px] text-purple-300">Monitoring Aktif</p>
                         </div>
                     </div>
-                    <div class="bg-[#1e1b4b]/80 p-3.5 rounded-2xl border border-white/5 text-xs text-purple-200 leading-relaxed">
-                        "Jaringan SINDORA_FURNITURE terpantau stabil. Jadwal auto-reboot jam 03:00 pagi berfungsi optimal untuk membersihkan cache router setelah unduhan besar."
+                    <div class="bg-[#151238]/80 p-3 rounded-2xl border border-white/5 text-[11px] text-purple-200 leading-relaxed">
+                        "Jaringan stabil. Klik IP D-Link di atas untuk masuk langsung ke web admin router saat terhubung ke Wi-Fi rumah."
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- JavaScript untuk Interaksi Submenu (Preview Tujuan Menu) -->
+    <!-- JavaScript & Submenu Preview Logic -->
     <script>
         const ctx = document.getElementById('mainChart').getContext('2d');
         const mainChart = new Chart(ctx, {
@@ -214,7 +216,7 @@
                     data: [45, 60, 85, 110, 95, 130, 142],
                     borderColor: '#a855f7',
                     backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                    borderWidth: 3,
+                    borderWidth: 2.5,
                     tension: 0.4,
                     fill: true
                 }, {
@@ -230,96 +232,104 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#c084fc', font: { size: 11 } } } },
+                plugins: { legend: { labels: { color: '#c084fc', font: { size: 10 } } } },
                 scales: {
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#94a3b8', font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } }
                 }
             }
         });
 
-        function switchTab(tab) {
-            // Update Active Sidebar Icon
-            document.querySelectorAll('.sidebar-icon').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + tab).classList.add('active');
+        function setActiveTab(tab) {
+            ['pc', 'm'].forEach(suffix => {
+                ['dash', 'topo', 'band', 'client', 'set'].forEach(t => {
+                    const el = document.getElementById(`nav-${t}-${suffix}`);
+                    if(el) el.classList.remove('active');
+                });
+            });
+            const targetMap = { dashboard: 'dash', topology: 'topo', bandwidth: 'band', clients: 'client', settings: 'set' };
+            const key = targetMap[tab];
+            ['pc', 'm'].forEach(suffix => {
+                const el = document.getElementById(`nav-${key}-${suffix}`);
+                if(el) el.classList.add('active');
+            });
+        }
 
+        function switchTab(tab) {
+            setActiveTab(tab);
             const title = document.getElementById('page-title');
             const desc = document.getElementById('page-desc');
             const content = document.getElementById('dynamic-content');
 
             if (tab === 'dashboard') {
-                title.innerText = 'Dashboard';
-                desc.innerText = 'Ringkasan performa jaringan rumah XL Home secara real-time';
-                location.reload(); // Reset ke view awal
+                location.reload();
             } else if (tab === 'topology') {
                 title.innerText = 'Topologi Perangkat Jaringan';
-                desc.innerText = 'Pratinjau jalur koneksi fisik dari Fiber ONT XL Home ke D-Link dan TP-Link';
+                desc.innerText = 'Jalur koneksi fisik dari Fiber ONT ke D-Link & TP-Link';
                 content.innerHTML = `
-                    <div class="lg:col-span-3 glass-card p-8 rounded-3xl space-y-6">
-                        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-network-wired text-purple-400 mr-2"></i> Jalur Fisik Perangkat Rumah</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                            <div class="p-6 rounded-2xl bg-[#1e1b4b]/60 border border-white/10">
-                                <i class="fa-solid fa-server text-3xl text-blue-400 mb-3"></i>
-                                <h4 class="font-bold text-white text-sm">Fiber ONT XL Home</h4>
-                                <p class="text-xs text-purple-300 mt-1">Sumber Internet Utama (1Gbps)</p>
+                    <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-6">
+                        <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-network-wired text-purple-400 mr-2"></i> Struktur Jalur Fisik Rumah</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div class="p-5 rounded-2xl bg-[#1e1b4b]/60 border border-white/10">
+                                <i class="fa-solid fa-server text-2xl text-blue-400 mb-2"></i>
+                                <h4 class="font-bold text-white text-xs">Fiber ONT XL Home</h4>
+                                <p class="text-[11px] text-purple-300 mt-1">Sumber Utama</p>
                             </div>
-                            <div class="p-6 rounded-2xl bg-[#1e1b4b]/60 border border-white/10">
-                                <i class="fa-solid fa-router text-3xl text-purple-400 mb-3"></i>
-                                <h4 class="font-bold text-white text-sm">Modem Utama D-Link</h4>
-                                <p class="text-xs text-purple-300 mt-1">Gateway & DHCP Server (192.168.10.1)</p>
+                            <div class="p-5 rounded-2xl bg-[#1e1b4b]/60 border border-white/10">
+                                <i class="fa-solid fa-router text-2xl text-purple-400 mb-2"></i>
+                                <h4 class="font-bold text-white text-xs">Modem D-Link</h4>
+                                <p class="text-[11px] text-purple-300 mt-1">192.168.10.1 (Gateway)</p>
                             </div>
-                            <div class="p-6 rounded-2xl bg-[#1e1b4b]/60 border border-white/10">
-                                <i class="fa-solid fa-wifi text-3xl text-indigo-400 mb-3"></i>
-                                <h4 class="font-bold text-white text-sm">TP-Link AX1500</h4>
-                                <p class="text-xs text-purple-300 mt-1">Access Point Mode (SINDORA_FURNITURE)</p>
+                            <div class="p-5 rounded-2xl bg-[#1e1b4b]/60 border border-white/10">
+                                <i class="fa-solid fa-wifi text-2xl text-indigo-400 mb-2"></i>
+                                <h4 class="font-bold text-white text-xs">TP-Link AX1500</h4>
+                                <p class="text-[11px] text-purple-300 mt-1">AP Mode (SINDORA)</p>
                             </div>
                         </div>
                     </div>
                 `;
             } else if (tab === 'bandwidth') {
-                title.innerText = 'Statistik & Grafik Bandwidth';
-                desc.innerText = 'Analisis mendalam konsumsi data harian dan kecepatan unduh/unggah';
+                title.innerText = 'Statistik Bandwidth';
+                desc.innerText = 'Analisis konsumsi data dan kecepatan';
                 content.innerHTML = `
-                    <div class="lg:col-span-3 glass-card p-8 rounded-3xl space-y-6">
-                        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-chart-line text-purple-400 mr-2"></i> Laporan Kecepatan & Trafik</h3>
-                        <p class="text-xs text-purple-300">Grafik analitik penggunaan bandwidth untuk mendeteksi lonjakan trafik berat (seperti update game COD Warzone).</p>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-                            <div class="p-4 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-xs text-purple-400">Peak Download</span><h4 class="text-xl font-bold text-white mt-1">142.5 Mbps</h4></div>
-                            <div class="p-4 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-xs text-purple-400">Peak Upload</span><h4 class="text-xl font-bold text-white mt-1">42.8 Mbps</h4></div>
-                            <div class="p-4 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-xs text-purple-400">Avg Latency</span><h4 class="text-xl font-bold text-white mt-1">12 ms</h4></div>
-                            <div class="p-4 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-xs text-purple-400">Packet Loss</span><h4 class="text-xl font-bold text-emerald-400 mt-1">0.0%</h4></div>
+                    <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-4">
+                        <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-chart-line text-purple-400 mr-2"></i> Laporan Trafik Jaringan</h3>
+                        <p class="text-xs text-purple-300">Memantau kestabilan trafik saat unduhan besar (seperti COD Warzone).</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Peak Download</span><h4 class="text-base font-bold text-white mt-0.5">142.5 Mbps</h4></div>
+                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Peak Upload</span><h4 class="text-base font-bold text-white mt-0.5">42.8 Mbps</h4></div>
+                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Avg Latency</span><h4 class="text-base font-bold text-white mt-0.5">12 ms</h4></div>
+                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Packet Loss</span><h4 class="text-base font-bold text-emerald-400 mt-0.5">0.0%</h4></div>
                         </div>
                     </div>
                 `;
             } else if (tab === 'clients') {
-                title.innerText = 'Daftar Perangkat Terhubung';
-                desc.innerText = 'Monitoring perangkat smartphone, laptop, dan smart TV di rumah';
+                title.innerText = 'Perangkat Terhubung';
+                desc.innerText = 'Daftar client aktif di jaringan rumah';
                 content.innerHTML = `
-                    <div class="lg:col-span-3 glass-card p-8 rounded-3xl space-y-6">
-                        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-laptop text-purple-400 mr-2"></i> Client Devices Active</h3>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center p-4 rounded-xl bg-[#1e1b4b]/60 border border-white/5">
-                                <div class="flex items-center space-x-3"><i class="fa-brands fa-apple text-xl text-white"></i><div><h4 class="text-xs font-bold text-white">iPhone 17 Pro Max</h4><p class="text-[10px] text-purple-300">Wi-Fi 5GHz - TP-Link AX1500</p></div></div>
-                                <span class="text-xs text-emerald-400 font-medium">Active (Connected)</span>
+                    <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-4">
+                        <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-laptop text-purple-400 mr-2"></i> Client Active List</h3>
+                        <div class="space-y-2.5">
+                            <div class="flex justify-between items-center p-3.5 rounded-xl bg-[#1e1b4b]/60 border border-white/5">
+                                <div class="flex items-center space-x-3"><i class="fa-brands fa-apple text-lg text-white"></i><div><h4 class="text-xs font-bold text-white">iPhone 17 Pro Max</h4><p class="text-[9px] text-purple-300">Wi-Fi 5GHz - TP-Link</p></div></div>
+                                <span class="text-[11px] text-emerald-400 font-medium">Connected</span>
                             </div>
-                            <div class="flex justify-between items-center p-4 rounded-xl bg-[#1e1b4b]/60 border border-white/5">
-                                <div class="flex items-center space-x-3"><i class="fa-solid fa-desktop text-xl text-blue-400"></i><div><h4 class="text-xs font-bold text-white">Windows 11 Gaming PC</h4><p class="text-[10px] text-purple-300">Ethernet LAN 1Gbps - D-Link Router</p></div></div>
-                                <span class="text-xs text-emerald-400 font-medium">Active (High Traffic)</span>
+                            <div class="flex justify-between items-center p-3.5 rounded-xl bg-[#1e1b4b]/60 border border-white/5">
+                                <div class="flex items-center space-x-3"><i class="fa-solid fa-desktop text-lg text-blue-400"></i><div><h4 class="text-xs font-bold text-white">Windows 11 PC</h4><p class="text-[9px] text-purple-300">Ethernet LAN - D-Link</p></div></div>
+                                <span class="text-[11px] text-emerald-400 font-medium">Active</span>
                             </div>
                         </div>
                     </div>
                 `;
             } else if (tab === 'settings') {
-                title.innerText = 'Pengaturan & Jadwal Otomatis';
-                desc.innerText = 'Konfigurasi sistem auto-reboot dan preferensi router';
+                title.innerText = 'Pengaturan Sistem';
+                desc.innerText = 'Konfigurasi otomatisasi router';
                 content.innerHTML = `
-                    <div class="lg:col-span-3 glass-card p-8 rounded-3xl space-y-6">
-                        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-gear text-purple-400 mr-2"></i> Konfigurasi Sistem</h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center p-4 rounded-xl bg-[#1e1b4b]/60 border border-white/5">
-                                <div><h4 class="text-xs font-bold text-white">Scheduled Daily Reboot</h4><p class="text-[10px] text-purple-300">Membersihkan cache router otomatis setiap pukul 03:00 WIB</p></div>
-                                <span class="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-lg font-medium">Enabled (Active)</span>
-                            </div>
+                    <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-4">
+                        <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-gear text-purple-400 mr-2"></i> Pengaturan Otomatis</h3>
+                        <div class="p-3.5 rounded-xl bg-[#1e1b4b]/60 border border-white/5 flex justify-between items-center">
+                            <div><h4 class="text-xs font-bold text-white">Scheduled Daily Reboot</h4><p class="text-[10px] text-purple-300">Pembersihan cache otomatis pukul 03:00 WIB</p></div>
+                            <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-medium">Enabled</span>
                         </div>
                     </div>
                 `;
