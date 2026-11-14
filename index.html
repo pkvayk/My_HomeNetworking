@@ -1,229 +1,264 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Network Command Center - Secure UI</title>
+    <title>Home Network Command Center</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: {} }
+            theme: {
+                extend: {
+                    colors: {
+                        accent: { 500: '#f59e0b', 600: '#d97706' }, // Orange / Yellow Secondary
+                    }
+                }
+            }
         }
     </script>
-    <!-- Chart.js untuk Grafik Bandwidth -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome untuk Ikon -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
         
-        /* Dark Theme Styles */
-        .dark body { background-color: #090718; color: #e2e8f0; }
+        /* Dark Theme: Deep Black/Dark Gray with Orange/Yellow Accent */
+        .dark body { background-color: #0f1115; color: #f3f4f6; }
         .dark .glass-card {
-            background: rgba(26, 22, 60, 0.65);
+            background: rgba(24, 28, 36, 0.75);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .dark .glass-sidebar {
-            background: rgba(21, 18, 56, 0.85);
+            background: rgba(18, 21, 28, 0.85);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .dark .nav-btn.active, .dark .nav-btn:hover {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-            color: #ffffff;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #000000;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
         }
 
-        /* Light Theme Styles */
-        body:not(.dark) { background-color: #f8fafc; color: #1e293b; }
+        /* Light Theme: Pure White/Light Gray with High Contrast Dark Icons & Orange Accent */
+        body:not(.dark) { background-color: #f4f5f7; color: #111827; }
         body:not(.dark) .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.05);
-        }
-        body:not(.dark) .glass-sidebar {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        body:not(.dark) .glass-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
         }
         body:not(.dark) .nav-btn.active, body:not(.dark) .nav-btn:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: #ffffff;
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
         }
-        body:not(.dark) .text-purple-300, body:not(.dark) .text-purple-400 { color: #64748b !important; }
-        body:not(.dark) .bg-\[\#1e1b4b\] { background-color: #f1f5f9 !important; }
+        body:not(.dark) .text-sub { color: #4b5563 !important; }
+        body:not(.dark) .input-box { background-color: #e5e7eb !important; color: #111827 !important; border-color: #d1d5db !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row p-3 md:p-6 gap-4 md:gap-6 select-none pb-24 md:pb-6">
 
-    <!-- PIN SECURITY MODAL (Double Protection) -->
+    <!-- PIN SECURITY MODAL (Numeric Keyboard Only) -->
     <div id="pin-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
         <div class="glass-card p-6 md:p-8 rounded-3xl max-w-sm w-full text-center space-y-5 shadow-2xl">
-            <div class="w-14 h-14 bg-purple-600/20 text-purple-400 rounded-2xl mx-auto flex items-center justify-center text-2xl">
+            <div class="w-14 h-14 bg-amber-500/20 text-amber-500 rounded-2xl mx-auto flex items-center justify-center text-2xl">
                 <i class="fa-solid fa-lock"></i>
             </div>
             <div>
-                <h2 class="text-lg font-bold text-white dark:text-white">Akses Terproteksi</h2>
-                <p class="text-xs text-purple-300 mt-1">Masukkan 4 Digit PIN Keamanan Rumah (Default: 1234)</p>
+                <h2 id="txt-pin-title" class="text-lg font-bold">Secure Access</h2>
+                <p id="txt-pin-desc" class="text-xs text-sub mt-1">Enter 4-digit PIN (Default: 1234)</p>
             </div>
             <div class="flex justify-center gap-3">
-                <input type="password" maxlength="1" id="p1" class="w-12 h-12 text-center text-xl font-bold bg-[#1e1b4b] border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500" onkeyup="autoFocus(this, 'p2')">
-                <input type="password" maxlength="1" id="p2" class="w-12 h-12 text-center text-xl font-bold bg-[#1e1b4b] border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500" onkeyup="autoFocus(this, 'p3')">
-                <input type="password" maxlength="1" id="p3" class="w-12 h-12 text-center text-xl font-bold bg-[#1e1b4b] border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500" onkeyup="autoFocus(this, 'p4')">
-                <input type="password" maxlength="1" id="p4" class="w-12 h-12 text-center text-xl font-bold bg-[#1e1b4b] border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500" onkeyup="verifyPin()">
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="p1" class="w-12 h-12 text-center text-xl font-bold input-box border rounded-xl focus:outline-none focus:border-amber-500" onkeyup="autoFocus(this, 'p2')">
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="p2" class="w-12 h-12 text-center text-xl font-bold input-box border rounded-xl focus:outline-none focus:border-amber-500" onkeyup="autoFocus(this, 'p3')">
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="p3" class="w-12 h-12 text-center text-xl font-bold input-box border rounded-xl focus:outline-none focus:border-amber-500" onkeyup="autoFocus(this, 'p4')">
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="p4" class="w-12 h-12 text-center text-xl font-bold input-box border rounded-xl focus:outline-none focus:border-amber-500" onkeyup="verifyPin()">
             </div>
-            <p id="pin-error" class="text-xs text-rose-400 hidden">PIN Salah! Coba lagi (Hint: 1234)</p>
+            <p id="pin-error" class="text-xs text-rose-500 hidden">Incorrect PIN! Try again (Hint: 1234)</p>
+        </div>
+    </div>
+
+    <!-- DEVICE INSPECTION MODAL (Detail Analisa Perangkat/Kabel) -->
+    <div id="device-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card p-6 rounded-3xl max-w-md w-full space-y-4">
+            <div class="flex justify-between items-center border-b pb-3 border-white/10">
+                <h3 id="modal-dev-title" class="font-bold text-base text-amber-500">Device Diagnostics</h3>
+                <button onclick="closeDeviceModal()" class="text-sub hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="modal-dev-content" class="space-y-3 text-xs text-sub">
+                <!-- Diisi via JS -->
+            </div>
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeDeviceModal()" class="bg-amber-500 text-black font-semibold px-4 py-2 rounded-xl text-xs">Close</button>
+            </div>
         </div>
     </div>
 
     <!-- DESKTOP SIDEBAR -->
     <aside class="hidden md:flex w-20 glass-sidebar rounded-3xl flex-col items-center justify-between py-8 shadow-2xl shrink-0">
         <div class="flex flex-col items-center space-y-8">
-            <div class="w-12 h-12 bg-gradient-to-tr from-purple-600 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                <i class="fa-solid fa-cube text-xl"></i>
+            <div class="w-12 h-12 bg-gradient-to-tr from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center text-black font-bold shadow-lg">
+                <i class="fa-solid fa-network-wired text-xl"></i>
             </div>
             <nav class="flex flex-col space-y-4">
-                <button onclick="switchTab('dashboard')" id="nav-dash-pc" class="nav-btn active w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300"><i class="fa-solid fa-house"></i></button>
-                <button onclick="switchTab('topology')" id="nav-topo-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300"><i class="fa-solid fa-network-wired"></i></button>
-                <button onclick="switchTab('bandwidth')" id="nav-band-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300"><i class="fa-solid fa-chart-line"></i></button>
-                <button onclick="switchTab('clients')" id="nav-client-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300"><i class="fa-solid fa-laptop"></i></button>
-                <button onclick="switchTab('settings')" id="nav-set-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-purple-300"><i class="fa-solid fa-gear"></i></button>
+                <button onclick="switchTab('dashboard')" id="nav-dash-pc" class="nav-btn active w-12 h-12 rounded-2xl flex items-center justify-center text-sub" title="Dashboard"><i class="fa-solid fa-house"></i></button>
+                <button onclick="switchTab('topology')" id="nav-topo-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-sub" title="Topology"><i class="fa-solid fa-diagram-project"></i></button>
+                <button onclick="switchTab('bandwidth')" id="nav-band-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-sub" title="Bandwidth"><i class="fa-solid fa-chart-line"></i></button>
+                <button onclick="switchTab('clients')" id="nav-client-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-sub" title="Clients"><i class="fa-solid fa-laptop"></i></button>
+                <button onclick="switchTab('settings')" id="nav-set-pc" class="nav-btn w-12 h-12 rounded-2xl flex items-center justify-center text-sub" title="Settings"><i class="fa-solid fa-gear"></i></button>
             </nav>
         </div>
-        <div class="text-purple-400 hover:text-white cursor-pointer"><i class="fa-solid fa-arrow-right-from-bracket text-lg"></i></div>
+        <div class="text-sub hover:text-amber-500 cursor-pointer"><i class="fa-solid fa-shield-halved text-lg"></i></div>
     </aside>
 
     <!-- MOBILE BOTTOM NAVIGATION -->
     <nav class="md:hidden fixed bottom-3 left-3 right-3 z-40 glass-sidebar rounded-2xl p-2 flex justify-around items-center shadow-2xl">
-        <button onclick="switchTab('dashboard')" id="nav-dash-m" class="nav-btn active p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-house text-base"></i></button>
-        <button onclick="switchTab('topology')" id="nav-topo-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-network-wired text-base"></i></button>
-        <button onclick="switchTab('bandwidth')" id="nav-band-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-chart-line text-base"></i></button>
-        <button onclick="switchTab('clients')" id="nav-client-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-laptop text-base"></i></button>
-        <button onclick="switchTab('settings')" id="nav-set-m" class="nav-btn p-3 rounded-xl text-purple-300 flex flex-col items-center"><i class="fa-solid fa-gear text-base"></i></button>
+        <button onclick="switchTab('dashboard')" id="nav-dash-m" class="nav-btn active p-3 rounded-xl text-sub flex flex-col items-center"><i class="fa-solid fa-house text-base"></i></button>
+        <button onclick="switchTab('topology')" id="nav-topo-m" class="nav-btn p-3 rounded-xl text-sub flex flex-col items-center"><i class="fa-solid fa-diagram-project text-base"></i></button>
+        <button onclick="switchTab('bandwidth')" id="nav-band-m" class="nav-btn p-3 rounded-xl text-sub flex flex-col items-center"><i class="fa-solid fa-chart-line text-base"></i></button>
+        <button onclick="switchTab('clients')" id="nav-client-m" class="nav-btn p-3 rounded-xl text-sub flex flex-col items-center"><i class="fa-solid fa-laptop text-base"></i></button>
+        <button onclick="switchTab('settings')" id="nav-set-m" class="nav-btn p-3 rounded-xl text-sub flex flex-col items-center"><i class="fa-solid fa-gear text-base"></i></button>
     </nav>
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col gap-5 max-w-7xl mx-auto w-full overflow-hidden">
         
+        <!-- Header dengan Bahasa & Status -->
         <header class="flex justify-between items-center glass-card px-5 py-3.5 rounded-2xl">
             <div>
-                <h1 id="page-title" class="text-lg md:text-xl font-bold tracking-wide">Dashboard</h1>
-                <p id="page-desc" class="text-[11px] md:text-xs text-purple-300">XL Home - SINDORA_FURNITURE</p>
+                <h1 id="page-title" class="text-lg md:text-xl font-bold tracking-wide">Network Dashboard</h1>
+                <p id="page-desc" class="text-[11px] md:text-xs text-sub">XL Home - SINDORA_FURNITURE</p>
             </div>
             <div class="flex items-center space-x-3">
-                <div class="hidden sm:flex items-center space-x-1.5 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Reboot 03:00 Active</span>
+                <!-- Language Selector -->
+                <div class="flex bg-black/20 dark:bg-white/10 p-1 rounded-xl gap-1">
+                    <button onclick="setLanguage('en')" id="lang-en" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-black">🇺🇸 EN</button>
+                    <button onclick="setLanguage('id')" id="lang-id" class="px-2.5 py-1 rounded-lg text-xs font-bold text-sub">🇮🇩 ID</button>
                 </div>
-                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
+                <!-- Status Auto-Reboot -->
+                <div class="hidden sm:flex items-center space-x-1.5 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-500 text-xs font-medium">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="txt-reboot-badge">Reboot 03:00 Active</span>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-500 flex items-center justify-center text-black font-bold text-xs shadow-md">
                     SF
                 </div>
             </div>
         </header>
 
+        <!-- DYNAMIC CONTENT VIEW -->
         <div id="dynamic-content" class="grid grid-cols-1 lg:grid-cols-3 gap-5 flex-1">
             
             <div class="lg:col-span-2 space-y-5">
+                <!-- Live Traffic Chart -->
                 <div class="glass-card p-5 rounded-3xl relative overflow-hidden">
                     <div class="flex justify-between items-center mb-4">
                         <div>
-                            <span class="text-[10px] text-purple-400 uppercase tracking-wider font-semibold">Live Traffic Monitor</span>
-                            <h2 class="text-base font-bold">Aktivitas Jaringan & Bandwidth</h2>
+                            <span id="txt-live-traffic" class="text-[10px] text-amber-500 uppercase tracking-wider font-semibold">Live Traffic Monitor</span>
+                            <h2 id="txt-traffic-title" class="text-base font-bold">Bandwidth Activity</h2>
                         </div>
-                        <span class="bg-purple-900/50 text-purple-200 px-2.5 py-0.5 rounded-lg text-[10px] font-medium border border-purple-500/30">Live</span>
+                        <span class="bg-amber-500/20 text-amber-500 px-2.5 py-0.5 rounded-lg text-[10px] font-medium border border-amber-500/30">Live</span>
                     </div>
                     <div class="h-48 md:h-56">
                         <canvas id="mainChart"></canvas>
                     </div>
                 </div>
 
+                <!-- Metrics -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="glass-card p-4 rounded-2xl">
-                        <div class="flex justify-between items-center text-purple-300 text-xs mb-2">
-                            <span>Download Avg</span>
-                            <i class="fa-solid fa-arrow-down text-emerald-400"></i>
+                        <div class="flex justify-between items-center text-sub text-xs mb-2">
+                            <span id="txt-dl">Download Avg</span>
+                            <i class="fa-solid fa-arrow-down text-emerald-500"></i>
                         </div>
-                        <h3 class="text-xl font-extrabold">142.5 <span class="text-xs font-normal text-purple-300">Mbps</span></h3>
-                        <div class="w-full bg-purple-950/40 rounded-full h-1.5 mt-3 overflow-hidden">
-                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-[75%]"></div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-4 rounded-2xl">
-                        <div class="flex justify-between items-center text-purple-300 text-xs mb-2">
-                            <span>Upload Avg</span>
-                            <i class="fa-solid fa-arrow-up text-blue-400"></i>
-                        </div>
-                        <h3 class="text-xl font-extrabold">42.8 <span class="text-xs font-normal text-purple-300">Mbps</span></h3>
-                        <div class="w-full bg-purple-950/40 rounded-full h-1.5 mt-3 overflow-hidden">
-                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full w-[45%]"></div>
+                        <h3 class="text-xl font-extrabold">142.5 <span class="text-xs font-normal text-sub">Mbps</span></h3>
+                        <div class="w-full bg-black/10 dark:bg-purple-950/40 rounded-full h-1.5 mt-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-500 to-yellow-500 h-full w-[75%]"></div>
                         </div>
                     </div>
 
                     <div class="glass-card p-4 rounded-2xl">
-                        <div class="flex justify-between items-center text-purple-300 text-xs mb-2">
-                            <span>Total Kuota</span>
-                            <i class="fa-solid fa-database text-purple-400"></i>
+                        <div class="flex justify-between items-center text-sub text-xs mb-2">
+                            <span id="txt-ul">Upload Avg</span>
+                            <i class="fa-solid fa-arrow-up text-blue-500"></i>
                         </div>
-                        <h3 class="text-xl font-extrabold">186.5 <span class="text-xs font-normal text-purple-300">GB</span></h3>
-                        <div class="w-full bg-purple-950/40 rounded-full h-1.5 mt-3 overflow-hidden">
-                            <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-[60%]"></div>
+                        <h3 class="text-xl font-extrabold">42.8 <span class="text-xs font-normal text-sub">Mbps</span></h3>
+                        <div class="w-full bg-black/10 dark:bg-purple-950/40 rounded-full h-1.5 mt-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-500 to-yellow-500 h-full w-[45%]"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-2xl">
+                        <div class="flex justify-between items-center text-sub text-xs mb-2">
+                            <span id="txt-quota">Total Quota</span>
+                            <i class="fa-solid fa-database text-amber-500"></i>
+                        </div>
+                        <h3 class="text-xl font-extrabold">186.5 <span class="text-xs font-normal text-sub">GB</span></h3>
+                        <div class="w-full bg-black/10 dark:bg-purple-950/40 rounded-full h-1.5 mt-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-500 to-yellow-500 h-full w-[60%]"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Right Column: Hardware & Interactive Topology Trigger -->
             <div class="space-y-5">
-                <!-- Hardware Status dengan Gateway 192.168.0.1 -->
                 <div class="glass-card p-5 rounded-3xl space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-wider">Perangkat Keras & Akses Router</h3>
+                    <h3 id="txt-hw-title" class="text-xs font-bold uppercase tracking-wider text-amber-500">Hardware & Interactive Links</h3>
                     
-                    <a href="http://192.168.0.1" target="_blank" class="p-3 rounded-2xl bg-purple-900/20 border border-purple-500/20 flex items-center justify-between hover:bg-purple-900/40 transition">
+                    <!-- D-Link Gateway -->
+                    <a href="http://192.168.0.1" target="_blank" class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between hover:bg-amber-500/20 transition">
                         <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-xl bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold">
                                 <i class="fa-solid fa-network-wired text-sm"></i>
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold">D-Link DIR-878</h4>
-                                <p class="text-[10px] text-purple-300">192.168.0.1 (Gateway)</p>
+                                <p class="text-[10px] text-sub">192.168.0.1 (Gateway)</p>
                             </div>
                         </div>
-                        <span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg">Buka Web <i class="fa-solid fa-external-link-alt ml-1"></i></span>
+                        <span class="text-[10px] bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-lg">Open Web</span>
                     </a>
 
-                    <div class="p-3 rounded-2xl bg-purple-900/20 border border-purple-500/20 flex items-center justify-between">
+                    <!-- TP-Link AX1500 (Directly Connected via iPhone source) -->
+                    <div onclick="inspectDevice('tplink')" class="p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-white/10 flex items-center justify-between cursor-pointer hover:border-amber-500 transition">
                         <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-xl bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold">
+                            <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">
                                 <i class="fa-solid fa-wifi text-sm"></i>
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold">TP-Link AX1500</h4>
-                                <p class="text-[10px] text-purple-300">AP Mode (SINDORA)</p>
+                                <p id="txt-ap-source" class="text-[10px] text-sub">AP Mode (Connected to iPhone)</p>
                             </div>
                         </div>
-                        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg font-medium">Stable</span>
+                        <span class="text-[10px] bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded-lg font-medium">Inspect <i class="fa-solid fa-chevron-right ml-1"></i></span>
                     </div>
                 </div>
 
+                <!-- AI Assistant -->
                 <div class="glass-card p-5 rounded-3xl space-y-3">
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xs">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-500 flex items-center justify-center text-black text-xs font-bold">
                             <i class="fa-solid fa-robot"></i>
                         </div>
                         <div>
-                            <h3 class="text-xs font-bold">AI Network Assistant</h3>
-                            <p class="text-[10px] text-purple-300">Monitoring Aktif</p>
+                            <h3 id="txt-ai-title" class="text-xs font-bold">AI Network Assistant</h3>
+                            <p id="txt-ai-sub" class="text-[10px] text-sub">Live Monitoring</p>
                         </div>
                     </div>
-                    <div class="bg-[#151238]/80 p-3 rounded-2xl border border-white/5 text-[11px] text-purple-200 leading-relaxed">
-                        "Gateway D-Link diset ke 192.168.0.1. Perlindungan PIN 4 digit aktif untuk keamanan akses rumah."
+                    <div id="txt-ai-desc" class="bg-black/10 dark:bg-black/40 p-3 rounded-2xl border border-white/5 text-[11px] text-sub leading-relaxed">
+                        "Gateway D-Link at 192.168.0.1. Click devices for deep inspection of MAC address, link speed (1000Mbps), and ping."
                     </div>
                 </div>
             </div>
@@ -231,7 +266,66 @@
     </main>
 
     <script>
-        // PIN Verification Logic
+        // Translations Dictionary
+        const langData = {
+            en: {
+                title: "Network Dashboard",
+                desc: "XL Home - SINDORA_FURNITURE",
+                rebootBadge: "Reboot 03:00 Active",
+                liveTraffic: "Live Traffic Monitor",
+                trafficTitle: "Bandwidth Activity",
+                dl: "Download Avg",
+                ul: "Upload Avg",
+                quota: "Total Quota",
+                hwTitle: "Hardware & Interactive Links",
+                aiTitle: "AI Network Assistant",
+                aiSub: "Live Monitoring",
+                aiDesc: "\"Gateway D-Link at 192.168.0.1. Click devices for deep inspection of MAC address, link speed (1000Mbps), and ping.\"",
+                pinTitle: "Secure Access",
+                pinDesc: "Enter 4-digit PIN (Default: 1234)"
+            },
+            id: {
+                title: "Dashboard Jaringan",
+                desc: "XL Home - SINDORA_FURNITURE",
+                rebootBadge: "Reboot 03:00 Aktif",
+                liveTraffic: "Monitor Trafik Langsung",
+                trafficTitle: "Aktivitas Bandwidth",
+                dl: "Rata-rata Download",
+                ul: "Rata-rata Upload",
+                quota: "Total Kuota",
+                hwTitle: "Perangkat & Tautan Interaktif",
+                aiTitle: "Asisten AI Jaringan",
+                aiSub: "Pemantauan Langsung",
+                aiDesc: "\"Gateway D-Link di 192.168.0.1. Klik perangkat untuk inspeksi mendalam alamat MAC, kecepatan link (1000Mbps), dan ping.\"",
+                pinTitle: "Akses Terproteksi",
+                pinDesc: "Masukkan PIN 4 digit (Default: 1234)"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-en').className = lang === 'en' ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-black' : 'px-2.5 py-1 rounded-lg text-xs font-bold text-sub';
+            document.getElementById('lang-id').className = lang === 'id' ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-black' : 'px-2.5 py-1 rounded-lg text-xs font-bold text-sub';
+            
+            document.getElementById('page-title').innerText = langData[lang].title;
+            document.getElementById('page-desc').innerText = langData[lang].desc;
+            document.getElementById('txt-reboot-badge').innerText = langData[lang].rebootBadge;
+            document.getElementById('txt-live-traffic').innerText = langData[lang].liveTraffic;
+            document.getElementById('txt-traffic-title').innerText = langData[lang].trafficTitle;
+            document.getElementById('txt-dl').innerText = langData[lang].dl;
+            document.getElementById('txt-ul').innerText = langData[lang].ul;
+            document.getElementById('txt-quota').innerText = langData[lang].quota;
+            document.getElementById('txt-hw-title').innerText = langData[lang].hwTitle;
+            document.getElementById('txt-ai-title').innerText = langData[lang].aiTitle;
+            document.getElementById('txt-ai-sub').innerText = langData[lang].aiSub;
+            document.getElementById('txt-ai-desc').innerText = langData[lang].aiDesc;
+            document.getElementById('txt-pin-title').innerText = langData[lang].pinTitle;
+            document.getElementById('txt-pin-desc').innerText = langData[lang].pinDesc;
+        }
+
+        // PIN Verification Logic (Numeric keyboard ensured via inputmode="numeric")
         function autoFocus(current, nextFieldId) {
             if (current.value.length >= 1) {
                 document.getElementById(nextFieldId).focus();
@@ -245,7 +339,7 @@
             const p4 = document.getElementById('p4').value;
             const pin = p1 + p2 + p3 + p4;
 
-            if (pin === '1234') { // PIN default bisa diubah di sini
+            if (pin === '1234') {
                 document.getElementById('pin-modal').style.display = 'none';
             } else if (pin.length === 4) {
                 document.getElementById('pin-error').classList.remove('hidden');
@@ -260,16 +354,42 @@
             }
         }
 
-        // Theme Toggle Function
-        fnThemeToggle = function(mode) {
+        // iOS Style Animated Appearance Toggle
+        function toggleAppearance() {
             const html = document.documentElement;
-            if (mode === 'light') {
+            if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
             } else {
                 html.classList.add('dark');
             }
         }
 
+        // Interactive Device & Cable Inspection
+        function inspectDevice(type) {
+            const modal = document.getElementById('device-modal');
+            const title = document.getElementById('modal-dev-title');
+            const content = document.getElementById('modal-dev-content');
+            modal.classList.remove('hidden');
+
+            if (type === 'tplink') {
+                title.innerText = "TP-Link AX1500 & Link Diagnostics";
+                content.innerHTML = `
+                    <p><b>Device Name:</b> TP-Link AX1500 (AP Mode)</p>
+                    <p><b>IP Address:</b> 192.168.0.2</p>
+                    <p><b>MAC Address:</b> 50:C7:BF:3B:82:10</p>
+                    <p><b>Uplink Connection:</b> Wired Ethernet to D-Link Router</p>
+                    <p><b>Link Speed:</b> <span class="text-emerald-500 font-bold">1000 Mbps (Gigabit Full Duplex)</span></p>
+                    <p><b>Ping to Gateway:</b> 1.2 ms</p>
+                    <p><b>Active Client Source:</b> Connected to iPhone 17 Pro Max</p>
+                `;
+            }
+        }
+
+        function closeDeviceModal() {
+            document.getElementById('device-modal').classList.add('hidden');
+        }
+
+        // Chart setup
         const ctx = document.getElementById('mainChart').getContext('2d');
         const mainChart = new Chart(ctx, {
             type: 'line',
@@ -278,8 +398,8 @@
                 datasets: [{
                     label: 'Download (Mbps)',
                     data: [45, 60, 85, 110, 95, 130, 142],
-                    borderColor: '#a855f7',
-                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
                     borderWidth: 2.5,
                     tension: 0.4,
                     fill: true
@@ -296,10 +416,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#c084fc', font: { size: 10 } } } },
+                plugins: { legend: { labels: { color: '#f59e0b', font: { size: 10 } } } },
                 scales: {
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#94a3b8', font: { size: 9 } } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 9 } } }
                 }
             }
         });
@@ -328,80 +448,82 @@
             if (tab === 'dashboard') {
                 location.reload();
             } else if (tab === 'topology') {
-                title.innerText = 'Topologi Perangkat Jaringan';
-                desc.innerText = 'Jalur koneksi fisik dari Fiber ONT ke D-Link & TP-Link';
+                title.innerText = currentLang === 'en' ? 'Interactive Network Topology' : 'Topologi Jaringan Interaktif';
+                desc.innerText = currentLang === 'en' ? 'Click any node to inspect physical connection & link speed' : 'Klik node untuk inspeksi koneksi fisik & kecepatan link';
                 content.innerHTML = `
                     <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-6">
-                        <h3 class="text-sm font-bold"><i class="fa-solid fa-network-wired text-purple-400 mr-2"></i> Struktur Jalur Fisik Rumah</h3>
+                        <h3 class="text-sm font-bold text-amber-500"><i class="fa-solid fa-diagram-project mr-2"></i> ${currentLang === 'en' ? 'Physical & Wireless Links' : 'Jalur Fisik & Nirkabel'}</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                            <div class="p-5 rounded-2xl bg-purple-950/20 border border-white/10">
-                                <i class="fa-solid fa-server text-2xl text-blue-400 mb-2"></i>
+                            <div class="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-white/10 cursor-pointer hover:border-amber-500 transition" onclick="inspectDevice('tplink')">
+                                <i class="fa-solid fa-server text-2xl text-amber-500 mb-2"></i>
                                 <h4 class="font-bold text-xs">Fiber ONT XL Home</h4>
-                                <p class="text-[11px] text-purple-300 mt-1">Sumber Utama</p>
+                                <p class="text-[11px] text-sub mt-1">Uplink 1Gbps</p>
                             </div>
-                            <div class="p-5 rounded-2xl bg-purple-950/20 border border-white/10">
-                                <i class="fa-solid fa-router text-2xl text-purple-400 mb-2"></i>
-                                <h4 class="font-bold text-xs">Modem D-Link</h4>
-                                <p class="text-[11px] text-purple-300 mt-1">192.168.0.1 (Gateway)</p>
+                            <div class="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-white/10 cursor-pointer hover:border-amber-500 transition" onclick="inspectDevice('tplink')">
+                                <i class="fa-solid fa-router text-2xl text-amber-500 mb-2"></i>
+                                <h4 class="font-bold text-xs">D-Link DIR-878</h4>
+                                <p class="text-[11px] text-sub mt-1">Gateway: 192.168.0.1</p>
                             </div>
-                            <div class="p-5 rounded-2xl bg-purple-950/20 border border-white/10">
-                                <i class="fa-solid fa-wifi text-2xl text-indigo-400 mb-2"></i>
+                            <div class="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-white/10 cursor-pointer hover:border-amber-500 transition" onclick="inspectDevice('tplink')">
+                                <i class="fa-solid fa-wifi text-2xl text-amber-500 mb-2"></i>
                                 <h4 class="font-bold text-xs">TP-Link AX1500</h4>
-                                <p class="text-[11px] text-purple-300 mt-1">AP Mode (SINDORA)</p>
+                                <p class="text-[11px] text-sub mt-1">AP Mode (Click to Inspect)</p>
                             </div>
                         </div>
                     </div>
                 `;
             } else if (tab === 'bandwidth') {
-                title.innerText = 'Statistik Bandwidth';
-                desc.innerText = 'Analisis konsumsi data dan kecepatan';
+                title.innerText = currentLang === 'en' ? 'Bandwidth Statistics' : 'Statistik Bandwidth';
+                desc.innerText = currentLang === 'en' ? 'Deep packet & traffic analytics' : 'Analisis trafik & paket mendalam';
                 content.innerHTML = `
                     <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-4">
-                        <h3 class="text-sm font-bold"><i class="fa-solid fa-chart-line text-purple-400 mr-2"></i> Laporan Trafik Jaringan</h3>
-                        <p class="text-xs text-purple-300">Memantau kestabilan trafik saat unduhan besar.</p>
+                        <h3 class="text-sm font-bold text-amber-500"><i class="fa-solid fa-chart-line mr-2"></i> Trafik Live</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
-                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Peak Download</span><h4 class="text-base font-bold mt-0.5">142.5 Mbps</h4></div>
-                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Peak Upload</span><h4 class="text-base font-bold mt-0.5">42.8 Mbps</h4></div>
-                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Avg Latency</span><h4 class="text-base font-bold mt-0.5">12 ms</h4></div>
-                            <div class="p-3.5 rounded-xl bg-purple-950/40 border border-white/5"><span class="text-[10px] text-purple-400">Packet Loss</span><h4 class="text-base font-bold text-emerald-400 mt-0.5">0.0%</h4></div>
+                            <div class="p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5"><span class="text-[10px] text-sub">Peak DL</span><h4 class="text-base font-bold mt-0.5">142.5 Mbps</h4></div>
+                            <div class="p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5"><span class="text-[10px] text-sub">Peak UL</span><h4 class="text-base font-bold mt-0.5">42.8 Mbps</h4></div>
+                            <div class="p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5"><span class="text-[10px] text-sub">Latency</span><h4 class="text-base font-bold mt-0.5">12 ms</h4></div>
+                            <div class="p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5"><span class="text-[10px] text-sub">Loss</span><h4 class="text-base font-bold text-emerald-500 mt-0.5">0.0%</h4></div>
                         </div>
                     </div>
                 `;
             } else if (tab === 'clients') {
-                title.innerText = 'Perangkat Terhubung';
-                desc.innerText = 'Daftar client aktif di jaringan rumah';
+                title.innerText = currentLang === 'en' ? 'Connected Clients' : 'Perangkat Terhubung';
+                desc.innerText = currentLang === 'en' ? 'Devices on AX1500 & D-Link' : 'Klien aktif pada AX1500 & D-Link';
                 content.innerHTML = `
                     <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-4">
-                        <h3 class="text-sm font-bold"><i class="fa-solid fa-laptop text-purple-400 mr-2"></i> Client Active List</h3>
+                        <h3 class="text-sm font-bold text-amber-500"><i class="fa-solid fa-laptop mr-2"></i> Active Clients</h3>
                         <div class="space-y-2.5">
-                            <div class="flex justify-between items-center p-3.5 rounded-xl bg-purple-950/20 border border-white/5">
-                                <div class="flex items-center space-x-3"><i class="fa-brands fa-apple text-lg"></i><div><h4 class="text-xs font-bold">iPhone 17 Pro Max</h4><p class="text-[9px] text-purple-300">Wi-Fi 5GHz - TP-Link</p></div></div>
-                                <span class="text-[11px] text-emerald-400 font-medium">Connected</span>
-                            </div>
-                            <div class="flex justify-between items-center p-3.5 rounded-xl bg-purple-950/20 border border-white/5">
-                                <div class="flex items-center space-x-3"><i class="fa-solid fa-desktop text-lg text-blue-400"></i><div><h4 class="text-xs font-bold">Windows 11 PC</h4><p class="text-[9px] text-purple-300">Ethernet LAN - D-Link</p></div></div>
-                                <span class="text-[11px] text-emerald-400 font-medium">Active</span>
+                            <div class="flex justify-between items-center p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5">
+                                <div class="flex items-center space-x-3"><i class="fa-brands fa-apple text-lg"></i><div><h4 class="text-xs font-bold">iPhone 17 Pro Max</h4><p class="text-[9px] text-sub">Wi-Fi 5GHz - TP-Link AX1500</p></div></div>
+                                <span class="text-[11px] text-emerald-500 font-medium">Connected</span>
                             </div>
                         </div>
                     </div>
                 `;
             } else if (tab === 'settings') {
-                title.innerText = 'Pengaturan Sistem & Tampilan';
-                desc.innerText = 'Mode tampilan dan konfigurasi keamanan';
+                title.innerText = currentLang === 'en' ? 'Settings & Security' : 'Pengaturan & Keamanan';
+                desc.innerText = currentLang === 'en' ? 'Appearance, PIN management & automation' : 'Tampilan, manajemen PIN & otomatisasi';
                 content.innerHTML = `
                     <div class="lg:col-span-3 glass-card p-6 md:p-8 rounded-3xl space-y-5">
-                        <h3 class="text-sm font-bold"><i class="fa-solid fa-gear text-purple-400 mr-2"></i> Pengaturan Tampilan & Keamanan</h3>
-                        <div class="space-y-3">
-                            <div class="p-4 rounded-xl bg-purple-950/20 border border-white/5 flex justify-between items-center">
-                                <div><h4 class="text-xs font-bold">Mode Tampilan (Theme Mode)</h4><p class="text-[10px] text-purple-300">Pilih mode gelap futuristik atau mode terang minimalis</p></div>
-                                <div class="flex gap-2">
-                                    <button onclick="fnThemeToggle('light')" class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-900 text-xs font-medium"><i class="fa-solid fa-sun mr-1"></i> Terang</button>
-                                    <button onclick="fnThemeToggle('dark')" class="px-3 py-1.5 rounded-lg bg-purple-900 text-purple-200 text-xs font-medium"><i class="fa-solid fa-moon mr-1"></i> Gelap</button>
-                                </div>
+                        <h3 class="text-sm font-bold text-amber-500"><i class="fa-solid fa-gear mr-2"></i> ${currentLang === 'en' ? 'System Configurations' : 'Konfigurasi Sistem'}</h3>
+                        <div class="space-y-4">
+                            <!-- iOS Style Appearance Toggle Button -->
+                            <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5 flex justify-between items-center">
+                                <div><h4 class="text-xs font-bold">Appearance Mode</h4><p class="text-[10px] text-sub">Switch between Dark (Black/Orange) and Light (White/Orange)</p></div>
+                                <button onclick="toggleAppearance()" class="px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-bold shadow-md hover:opacity-90 transition flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-half-stroke"></i> Toggle Theme
+                                </button>
                             </div>
-                            <div class="p-4 rounded-xl bg-purple-950/20 border border-white/5 flex justify-between items-center">
-                                <div><h4 class="text-xs font-bold">Scheduled Daily Reboot</h4><p class="text-[10px] text-purple-300">Pembersihan cache otomatis pukul 03:00 WIB</p></div>
-                                <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-medium">Enabled (03:00)</span>
+
+                            <!-- Change PIN Submenu -->
+                            <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5 space-y-3">
+                                <h4 class="text-xs font-bold">Change Security PIN</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Recent PIN" class="p-2.5 rounded-xl input-box border text-xs">
+                                    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="New PIN" class="p-2.5 rounded-xl input-box border text-xs">
+                                    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Reconfirm PIN" class="p-2.5 rounded-xl input-box border text-xs">
+                                </div>
+                                <button onclick="alert('PIN Updated Successfully!')" class="w-full py-2.5 rounded-xl bg-amber-500 text-black text-xs font-bold mt-2">Update PIN</button>
                             </div>
                         </div>
                     </div>
